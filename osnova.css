@@ -1,0 +1,195 @@
+/* Сбрасываем стандартные отступы и поля для всех элементов */
+* {
+    margin: 0;          /* Убираем внешние отступы */
+    padding: 0;         /* Убираем внутренние отступы */
+    box-sizing: border-box; /* Чтобы padding и border включались в размеры */
+}
+
+/* Стили для всего тела страницы */
+body {
+    font-family: 'Arial', sans-serif; /* Основной шрифт */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Градиентный фон */
+    min-height: 100vh; /* Минимальная высота - весь экран */
+    display: flex; /* Используем flexbox для центрирования */
+    flex-direction: column; /* Элементы в колонку */
+    align-items: center; /* Центрирование по горизонтали */
+    justify-content: center; /* Центрирование по вертикали */
+    color: white; /* Белый цвет текста */
+    padding: 20px; /* Отступы по краям */
+    line-height: 1.6; /* Межстрочный интервал */
+}
+
+/* Основной контейнер для контента */
+.container {
+    text-align: center; /* Выравнивание текста по центру */
+    max-width: 400px; /* Максимальная ширина */
+    width: 100%; /* На всю доступную ширину */
+    animation: fadeIn 0.5s ease-out; /* Анимация появления */
+}
+
+/* Анимация плавного появления */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); } /* Начальное состояние */
+    to { opacity: 1; transform: translateY(0); } /* Конечное состояние */
+}
+
+/* Стили для главного заголовка */
+h1 {
+    font-size: 24px; /* Размер шрифта */
+    margin-bottom: 20px; /* Отступ снизу */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3); /* Тень текста */
+}
+
+/* Стили для блока с информацией о пользователе */
+.user-info {
+    background: rgba(255, 255, 255, 0.1); /* Полупрозрачный белый фон */
+    padding: 15px; /* Внутренние отступы */
+    border-radius: 15px; /* Закругленные углы */
+    margin-bottom: 25px; /* Отступ снизу */
+    backdrop-filter: blur(10px); /* Эффект размытия фона */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* Полупрозрачная рамка */
+}
+
+/* Стили для отображения счетчика (большие цифры) */
+.counter-display {
+    font-size: 72px; /* Очень большой шрифт */
+    font-weight: bold; /* Жирное начертание */
+    margin: 25px 0; /* Отступы сверху и снизу */
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.4); /* Тень текста */
+    min-height: 90px; /* Минимальная высота */
+    transition: transform 0.3s; /* Плавная анимация изменения */
+}
+
+/* Эффект при обновлении счетчика */
+.counter-display.updated {
+    transform: scale(1.1); /* Увеличение */
+}
+
+/* Стили для главной кнопки нажатия */
+.click-button {
+    width: 200px; /* Ширина кнопки */
+    height: 200px; /* Высота кнопки */
+    border-radius: 50%; /* Делаем круглой */
+    background: linear-gradient(145deg, #f0f0f0, #cacaca); /* Градиентный фон */
+    border: none; /* Убираем стандартную рамку */
+    box-shadow: 10px 10px 30px rgba(0,0,0,0.3), /* Тень */
+                -10px -10px 30px rgba(255,255,255,0.1); /* Светлый блик */
+    font-size: 18px; /* Размер текста */
+    font-weight: bold; /* Жирный текст */
+    color: #333; /* Темно-серый цвет текста */
+    cursor: pointer; /* Курсор-указатель при наведении */
+    transition: all 0.2s; /* Плавные переходы */
+    margin: 20px auto; /* Центрирование с отступами */
+    display: block; /* Блочное отображение */
+    position: relative; /* Для позиционирования псевдоэлементов */
+    overflow: hidden; /* Скрываем выступающие части */
+}
+
+/* Эффект при наведении на кнопку */
+.click-button:hover {
+    transform: scale(1.05); /* Легкое увеличение */
+    box-shadow: 15px 15px 40px rgba(0,0,0,0.4); /* Усиленная тень */
+}
+
+/* Эффект при нажатии на кнопку */
+.click-button:active {
+    transform: scale(0.95); /* Уменьшение */
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.2); /* Уменьшенная тень */
+}
+
+/* Создаем эффект вспышки при нажатии */
+.click-button::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    transition: transform 0.3s;
+}
+
+/* Анимация вспышки при активации */
+.click-button:active::after {
+    transform: translate(-50%, -50%) scale(40);
+    transition: transform 0.4s;
+}
+
+/* Стили для блока статистики */
+.stats {
+    margin-top: 25px; /* Отступ сверху */
+    background: rgba(255, 255, 255, 0.15); /* Полупрозрачный фон */
+    padding: 20px; /* Внутренние отступы */
+    border-radius: 15px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    backdrop-filter: blur(5px); /* Легкое размытие фона */
+}
+
+/* Отдельный стиль для параграфов внутри статистики */
+.stats p {
+    margin-bottom: 8px; /* Отступ между строками */
+}
+
+/* Стили для кнопки сброса */
+.reset-button {
+    margin-top: 20px; /* Отступ сверху */
+    padding: 12px 30px; /* Внутренние отступы */
+    background: rgba(255, 59, 48, 0.9); /* Красный цвет с прозрачностью */
+    color: white; /* Белый текст */
+    border: none; /* Без рамки */
+    border-radius: 25px; /* Закругленные углы */
+    font-size: 16px; /* Размер шрифта */
+    cursor: pointer; /* Курсор-указатель */
+    transition: all 0.3s; /* Плавные переходы */
+    width: 100%; /* На всю ширину контейнера */
+    max-width: 250px; /* Но не более 250px */
+}
+
+/* Эффект при наведении на кнопку сброса */
+.reset-button:hover {
+    background: rgba(255, 59, 48, 1); /* Полностью красный */
+    transform: translateY(-2px); /* Поднимаем кнопку */
+    box-shadow: 0 5px 15px rgba(255, 59, 48, 0.4); /* Тень */
+}
+
+/* Эффект при нажатии на кнопку сброса */
+.reset-button:active {
+    transform: translateY(0); /* Возвращаем на место */
+}
+
+/* Стили для разделительной линии */
+.separator {
+    height: 1px; /* Толщина линии */
+    background: rgba(255, 255, 255, 0.2); /* Цвет линии */
+    margin: 25px 0; /* Отступы сверху и снизу */
+    width: 100%; /* На всю ширину */
+}
+
+/* Стили для блока с подсказками */
+.hint {
+    background: rgba(255, 255, 255, 0.1); /* Полупрозрачный фон */
+    padding: 15px; /* Внутренние отступы */
+    border-radius: 10px; /* Закругленные углы */
+    font-size: 14px; /* Меньший размер шрифта */
+    text-align: left; /* Выравнивание по левому краю */
+    margin-top: 15px; /* Отступ сверху */
+    border-left: 4px solid #667eea; /* Синяя линия слева */
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 480px) {
+    .click-button {
+        width: 180px; /* Уменьшаем кнопку */
+        height: 180px; /* Уменьшаем кнопку */
+    }
+    
+    .counter-display {
+        font-size: 60px; /* Уменьшаем цифры */
+    }
+    
+    h1 {
+        font-size: 20px; /* Уменьшаем заголовок */
+    }
+}
