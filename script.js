@@ -1,25 +1,66 @@
-// Хранение данных в localStorage
+// Конфигурация
 const STORAGE_KEY = 'catTrackerData';
 
 // Инициализация данных
 let catData = {
     actions: [],
-    lastReset: new Date().toISOString()
+    lastReset: new Date().toISOString(),
+    catName: 'Шнапупсик'
 };
 
-// Загрузка данных из localStorage
-function loadData() {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-        catData = JSON.parse(savedData);
-    }
-    updateUI();
+// Проверяем, находимся ли в Telegram Web App
+function isTelegramWebApp() {
+    return window.Telegram && Telegram.WebApp && Telegram.WebApp.CloudStorage;
 }
 
-// Сохранение данных в localStorage
+// Сохранение данных
 function saveData() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(catData));
-    updateUI();
+    if (isTelegramWebApp()) {
+        // Используем CloudStorage Telegram
+        Telegram.WebApp.CloudStorage.setItem('catData', JSON.stringify(catData), (error) => {
+            if (error) {
+                console.error('Ошибка сохранения в облако Telegram:', error);
+                // Резервное сохранение в localStorage
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(catData));
+            } else {
+                console.log('Данные сохранены в облако Telegram');
+            }
+        });
+    } else {
+        // Используем localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(catData));
+    }
+}
+
+// Загрузка данных
+function loadData() {
+    if (isTelegramWebApp()) {
+        // Загружаем из CloudStorage Telegram
+        Telegram.WebApp.CloudStorage.getItem('catData', (error, data) => {
+            if (error) {
+                console.error('Ошибка загрузки из облака Telegram:', error);
+                // Пробуем загрузить из localStorage
+                const savedData = localStorage.getItem(STORAGE_KEY);
+                if (savedData) {
+                    catData = JSON.parse(savedData);
+                }
+            } else {
+                if (data) {
+                    catData = JSON.parse(data);
+                }
+            }
+            updateUI();
+            updateCatNameDisplay();
+        });
+    } else {
+        // Загружаем из localStorage
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+            catData = JSON.parse(savedData);
+        }
+        updateUI();
+        updateCatNameDisplay();
+    }
 }
 
 // Добавление действия
@@ -29,21 +70,22 @@ function addAction(actionType) {
         timestamp: new Date().toISOString(),
         date: new Date().toLocaleDateString('ru-RU')
     };
-
+    
     catData.actions.push(action);
-
+    
     // Анимация кнопки
     const btn = event.target.closest('button');
     btn.style.transform = 'scale(0.95)';
     setTimeout(() => {
         btn.style.transform = '';
     }, 200);
-
+    
     // Обновление смайлика кота
     updateCatMood();
-
+    
     // Сохранение и обновление интерфейса
     saveData();
+    updateUI();
 }
 
 // Сброс данных
@@ -52,13 +94,32 @@ function resetData() {
         catData.actions = [];
         catData.lastReset = new Date().toISOString();
         saveData();
-
+        updateUI();
+        
         // Анимация сброса
         document.querySelector('.cat-face').textContent = '😾';
         document.getElementById('statusText').textContent = 'Зачем всё удалил?';
         setTimeout(() => {
             updateCatMood();
         }, 1500);
+    }
+}
+
+// Функция для смены имени кота
+function changeCatName() {
+    const newName = prompt('Введите новое имя кота:', catData.catName);
+    if (newName && newName.trim() !== '') {
+        catData.catName = newName.trim();
+        updateCatNameDisplay();
+        saveData();
+    }
+}
+
+// Обновление отображения имени кота
+function updateCatNameDisplay() {
+    const catNameElement = document.getElementById('catName');
+    if (catNameElement) {
+        catNameElement.textContent = catData.catName;
     }
 }
 
@@ -71,14 +132,14 @@ function updateCatMood() {
         const diffHours = (now - actionDate) / (1000 * 60 * 60);
         return diffHours < 24; // Действия за последние 24 часа
     });
-
+    
     const feedCount = lastActions.filter(a => a.type === 'feed').length;
     const cleanCount = lastActions.filter(a => a.type === 'clean').length;
     const playCount = lastActions.filter(a => a.type === 'play').length;
-
+    
     let catFace = '😺';
     let status = 'Кот доволен!';
-
+    
     if (feedCount === 0) {
         catFace = '😿';
         status = 'Кот голоден!';
@@ -92,7 +153,7 @@ function updateCatMood() {
         catFace = '😻';
         status = 'Кот в восторге!';
     }
-
+    
     document.querySelector('.cat-face').textContent = catFace;
     document.getElementById('statusText').textContent = status;
 }
@@ -102,7 +163,7 @@ function updateStats() {
     const feedCount = catData.actions.filter(a => a.type === 'feed').length;
     const cleanCount = catData.actions.filter(a => a.type === 'clean').length;
     const playCount = catData.actions.filter(a => a.type === 'play').length;
-
+    
     document.getElementById('fedCount').textContent = feedCount;
     document.getElementById('cleanedCount').textContent = cleanCount;
     document.getElementById('playedCount').textContent = playCount;
@@ -112,21 +173,21 @@ function updateStats() {
 function updateHistory() {
     const historyList = document.getElementById('historyList');
     const actions = catData.actions.slice(-10).reverse(); // Последние 10 действий
-
+    
     if (actions.length === 0) {
         historyList.innerHTML = '<div class="empty-history">Пока нет действий</div>';
         return;
     }
-
+    
     historyList.innerHTML = actions.map(action => {
         const time = new Date(action.timestamp).toLocaleTimeString('ru-RU', {
             hour: '2-digit',
             minute: '2-digit'
         });
         const date = new Date(action.timestamp).toLocaleDateString('ru-RU');
-
+        
         let actionText, actionClass;
-        switch (action.type) {
+        switch(action.type) {
             case 'feed':
                 actionText = 'Покормил кота';
                 actionClass = 'feed-item';
@@ -140,7 +201,7 @@ function updateHistory() {
                 actionClass = 'play-item';
                 break;
         }
-
+        
         return `
             <div class="history-item ${actionClass}">
                 <div>
@@ -157,27 +218,27 @@ function updateHistory() {
 function updateCalendar() {
     const weekCalendar = document.getElementById('weekCalendar');
     const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-
+    
     let calendarHTML = '';
-
+    
     // Создаем 7 дней назад от текущей даты
     for (let i = 6; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
         const dateString = date.toLocaleDateString('ru-RU');
         const dayName = days[date.getDay()];
-
+        
         // Находим действия за этот день
         const dayActions = catData.actions.filter(a => a.date === dateString);
         const feedCount = dayActions.filter(a => a.type === 'feed').length;
         const cleanCount = dayActions.filter(a => a.type === 'clean').length;
         const playCount = dayActions.filter(a => a.type === 'play').length;
-
+        
         // Определяем цвет дня
         let dayColor = '#f0f0f0';
         let dayEmoji = '⬜';
         let dayTitle = 'Нет действий';
-
+        
         if (dayActions.length > 0) {
             if (feedCount >= 2 && cleanCount >= 1 && playCount >= 1) {
                 dayColor = '#c6f6d5';
@@ -197,7 +258,7 @@ function updateCalendar() {
                 dayTitle = 'Плохой день';
             }
         }
-
+        
         calendarHTML += `
             <div class="day-box">
                 <div class="day-name">${dayName}</div>
@@ -211,7 +272,7 @@ function updateCalendar() {
             </div>
         `;
     }
-
+    
     weekCalendar.innerHTML = calendarHTML;
 }
 
@@ -225,6 +286,3 @@ function updateUI() {
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', loadData);
-
-// Автосохранение каждые 10 секунд (на всякий случай)
-setInterval(saveData, 10000);
